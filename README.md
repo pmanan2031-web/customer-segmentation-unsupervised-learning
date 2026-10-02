@@ -195,170 +195,307 @@ TotalPrice = Quantity × Price
 
 ---
 
-# 📈 Exploratory Data Analysis
+# 📊 Exploratory Data Analysis
 
-EDA was performed to understand the transaction and customer behaviour before clustering.
+## 1️⃣ Transaction-Level Analysis
 
-### Analysis Included
+The first stage explores transaction-level behaviour, including quantity, unit price and total transaction value.
 
-* Quantity distribution
-* Unit price distribution
-* Total transaction value
-* Monthly transaction trends
-* Customer purchase behaviour
-* Revenue analysis
-* RFM feature distributions
-* Outlier analysis
+<p align="center">
+  <img src="assets/graph_01.png"
+       alt="Quantity Unit Price and Total Price Distribution"
+       width="900">
+</p>
 
-The analysis reports **November 2011** as the highest transaction month and approximately **£14.34 million** in total revenue.
+### Key Analysis
 
----
-
-# 🧮 RFM Feature Engineering
-
-RFM is the core feature-engineering step of this project.
-
-| Feature      | Business Meaning                          |
-| ------------ | ----------------------------------------- |
-| 🕒 Recency   | Days since the customer's latest purchase |
-| 🔁 Frequency | Number of unique invoices/orders          |
-| 💰 Monetary  | Total amount spent by the customer        |
-
-### RFM Calculation
-
-For each customer:
-
-```text
-Customer
-   │
-   ├── Recency
-   ├── Frequency
-   └── Monetary
-```
-
-The result is a customer-level dataset instead of individual transaction-level records.
+- Quantity distribution
+- Unit price distribution
+- Total transaction value distribution
+- Log scale used for Total Price because of high skewness
 
 ---
 
-# 🛠️ RFM Preprocessing
+## 2️⃣ Customer Spending Analysis
 
-Customer behaviour contains extreme values, especially in Frequency and Monetary spending.
+Customer-level spending was analysed to understand the distribution of total customer revenue.
 
-The following preprocessing pipeline was applied:
+<p align="center">
+  <img src="assets/graph_02.png"
+       alt="Customer Total Spend Distribution"
+       width="850">
+</p>
 
-```text
-RFM Features
-     ↓
-Outlier Detection
-     ↓
-IQR-Based Capping
-     ↓
-Log Transformation
-     ↓
-StandardScaler
-     ↓
-Clustering Dataset
-```
-
-### Why Log Transformation?
-
-Frequency and Monetary values can be highly right-skewed.
-
-Log transformation helps reduce the effect of extreme values and makes the feature distributions more suitable for clustering.
-
-### Why StandardScaler?
-
-Clustering algorithms are distance-based.
-
-Scaling ensures that one feature does not dominate the others simply because it has a larger numerical range.
+This analysis helps identify customers with significantly higher spending behaviour.
 
 ---
 
-# 🤖 Model 1 — K-Means Clustering
+# 🧮 RFM Analysis & Preprocessing
 
-K-Means was evaluated using different values of `k`.
+## 3️⃣ RFM Features — Before Outlier Treatment
 
-The project tested:
+The initial RFM distributions were analysed before applying outlier treatment.
 
-```text
-k = 2 → 10
-```
+<p align="center">
+  <img src="assets/graph_03.png"
+       alt="RFM Features Before Outlier Capping"
+       width="900">
+</p>
 
-### Silhouette Scores
+The analysis covers:
 
-| Number of Clusters | Silhouette Score |
-| -----------------: | ---------------: |
-|                  2 |       **0.4322** |
-|                  3 |           0.4081 |
-|                  4 |           0.3737 |
-|                  5 |           0.3832 |
-|                  6 |           0.3522 |
-|                  7 |           0.3440 |
-|                  8 |           0.3445 |
-|                  9 |           0.3187 |
-|                 10 |           0.3167 |
-
-Based on the tested configurations, **k = 2** produced the highest silhouette score.
-
-### Selected Configuration
-
-```python
-KMeans(
-    n_clusters=2,
-    random_state=42
-)
-```
-
-### Interpretation
-
-A silhouette score of **0.4322** indicates that the selected clusters have meaningful separation, although the segmentation is not perfectly separated.
+- Recency
+- Frequency
+- Monetary
 
 ---
 
-# 🌳 Model 2 — Agglomerative Hierarchical Clustering
+## 4️⃣ RFM Features — After Outlier Capping
 
-Hierarchical clustering was explored using:
+An IQR-based capping approach was applied to reduce the influence of extreme values.
 
-* Ward linkage
-* Complete linkage
-* Average linkage
-
-A dendrogram was used to examine the hierarchical structure of customer groups.
-
-The evaluated configuration reported:
-
-```text
-Clusters: 4
-Linkage: Ward
-Silhouette: 0.3441
-```
-
-This provides an alternative view of customer structure compared with K-Means.
+<p align="center">
+  <img src="assets/graph_04.png"
+       alt="RFM Features After Outlier Capping"
+       width="900">
+</p>
 
 ---
 
-# 🔷 Model 3 — DBSCAN
+## 5️⃣ RFM Features — Before Log Transformation
 
-DBSCAN was used to identify dense groups and potential noise/outlier customers.
+Frequency and Monetary showed strong right-skewness before transformation.
 
-### Configuration
-
-```text
-eps = 0.5
-min_samples = 5
-```
-
-Unlike K-Means, DBSCAN can explicitly identify noise points.
-
-The selected configuration produced approximately:
-
-```text
-Noise = 48.72%
-```
-
-This indicates that a large proportion of customers were treated as noise under this configuration.
+<p align="center">
+  <img src="assets/graph_05.png"
+       alt="RFM Features Before Log Transformation"
+       width="900">
+</p>
 
 ---
+
+## 6️⃣ RFM Features — After Log Transformation
+
+`log1p()` transformation was applied to Frequency and Monetary features to reduce skewness.
+
+<p align="center">
+  <img src="assets/graph_06.png"
+       alt="RFM Features After Log Transformation"
+       width="900">
+</p>
+
+---
+
+# 🤖 K-Means Clustering
+
+## 7️⃣ Elbow Method & Silhouette Score
+
+Multiple values of `k` were evaluated using the Elbow Method and Silhouette Score.
+
+<p align="center">
+  <img src="assets/graph_07.png"
+       alt="K-Means Elbow Method and Silhouette Score"
+       width="900">
+</p>
+
+These metrics were used to determine a suitable number of customer clusters.
+
+---
+
+## 8️⃣ K-Means — Recency vs Monetary
+
+The customer segments are visualized using Recency and Monetary behaviour.
+
+<p align="center">
+  <img src="assets/graph_08.png"
+       alt="K-Means Recency vs Monetary Clusters"
+       width="850">
+</p>
+
+---
+
+## 9️⃣ K-Means — Frequency vs Monetary
+
+The relationship between purchase frequency and monetary value is visualized below.
+
+<p align="center">
+  <img src="assets/graph_09.png"
+       alt="K-Means Frequency vs Monetary Clusters"
+       width="850">
+</p>
+
+---
+
+## 🔟 3D K-Means Customer Segmentation
+
+The three RFM dimensions are visualized simultaneously:
+
+- Recency
+- Frequency
+- Monetary
+
+<p align="center">
+  <img src="assets/graph_10.png"
+       alt="3D K-Means Customer Clusters"
+       width="900">
+</p>
+
+---
+
+# 🌳 Hierarchical Clustering
+
+## 1️⃣1️⃣ Hierarchical Clustering Dendrogram
+
+Ward linkage was used to visualize the hierarchical structure of customer groups.
+
+<p align="center">
+  <img src="assets/graph_11.png"
+       alt="Hierarchical Clustering Dendrogram"
+       width="950">
+</p>
+
+The dendrogram helps determine a suitable cluster structure.
+
+---
+
+## 1️⃣2️⃣ Hierarchical — Recency vs Monetary
+
+The resulting hierarchical clusters are visualized using Recency and Monetary.
+
+<p align="center">
+  <img src="assets/graph_12.png"
+       alt="Hierarchical Clustering Recency vs Monetary"
+       width="850">
+</p>
+
+---
+
+## 1️⃣3️⃣ 3D Hierarchical Customer Clusters
+
+The hierarchical segmentation is further visualized across all three RFM dimensions.
+
+<p align="center">
+  <img src="assets/graph_13.png"
+       alt="3D Hierarchical Customer Clusters"
+       width="900">
+</p>
+
+---
+
+# 🔵 DBSCAN Clustering
+
+## 1️⃣4️⃣ DBSCAN k-NN Distance Plot
+
+The k-nearest-neighbour distance plot was used to investigate a suitable epsilon (`eps`) value for DBSCAN.
+
+<p align="center">
+  <img src="assets/graph_14.png"
+       alt="DBSCAN k-NN Distance Plot"
+       width="900">
+</p>
+
+---
+
+## 1️⃣5️⃣ DBSCAN Hyperparameter Tuning
+
+Different combinations of `eps` and `min_samples` were evaluated using silhouette score.
+
+<p align="center">
+  <img src="assets/graph_15.png"
+       alt="DBSCAN eps and min samples Hyperparameter Heatmap"
+       width="900">
+</p>
+
+This heatmap helps identify parameter combinations that produce better-separated clusters.
+
+---
+
+## 1️⃣6️⃣ DBSCAN — Recency vs Monetary
+
+DBSCAN customer clusters are visualized using Recency and Monetary.
+
+Noise points identified by DBSCAN are represented separately.
+
+<p align="center">
+  <img src="assets/graph_16.png"
+       alt="DBSCAN Recency vs Monetary Clusters"
+       width="850">
+</p>
+
+---
+
+## 1️⃣7️⃣ 3D DBSCAN Customer Segmentation
+
+The final DBSCAN structure is visualized using all three RFM dimensions.
+
+<p align="center">
+  <img src="assets/graph_17.png"
+       alt="3D DBSCAN Customer Clusters"
+       width="900">
+</p>
+
+---
+
+# 📊 Clustering Model Comparison
+
+The three unsupervised learning algorithms were evaluated using internal clustering metrics:
+
+| Metric | Purpose | Better Direction |
+|---|---|---|
+| Silhouette Score | Cluster separation and cohesion | Higher ↑ |
+| Davies-Bouldin Index | Cluster similarity | Lower ↓ |
+| Calinski-Harabasz Index | Between/within cluster dispersion | Higher ↑ |
+
+The comparison is performed directly in the notebook using the final K-Means, Agglomerative and DBSCAN labels. 
+
+---
+
+# 👥 Customer Segmentation
+
+The final clusters are analysed using RFM characteristics to understand customer behaviour.
+
+### RFM Interpretation
+
+| Feature | Meaning |
+|---|---|
+| **Recency** | How recently the customer purchased |
+| **Frequency** | How frequently the customer purchased |
+| **Monetary** | How much the customer spent |
+
+The resulting customer groups can be interpreted using their RFM profiles rather than relying only on cluster numbers.
+
+---
+
+# 💡 Business Insights
+
+The segmentation can support:
+
+- 🎯 Targeted marketing campaigns
+- ❤️ Customer retention
+- 💎 Loyalty programs
+- 🛍️ Cross-selling
+- 🔄 Customer reactivation
+- 📊 Customer behaviour monitoring
+
+---
+
+# 🔄 Complete Project Workflow
+
+<p align="center">
+  <img src="assets/workflow.png"
+       alt="Customer Segmentation Machine Learning Workflow"
+       width="950">
+</p>
+
+---
+
+# 📌 Project Overview
+
+<p align="center">
+  <img src="assets/project_overview.png"
+       alt="Customer Segmentation Project Overview"
+       width="950">
+</p>
 
 # 📊 Clustering Model Comparison
 
