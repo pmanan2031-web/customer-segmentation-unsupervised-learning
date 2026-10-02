@@ -479,23 +479,52 @@ The segmentation can support:
 
 ---
 
-# 🔄 Complete Project Workflow
-
-<p align="center">
-  <img src="assets/workflow.png"
-       alt="Customer Segmentation Machine Learning Workflow"
-       width="950">
-</p>
-
----
-
-# 📌 Project Overview
+## 📌 Project Overview
 
 <p align="center">
   <img src="assets/project_overview.png"
        alt="Customer Segmentation Project Overview"
        width="950">
 </p>
+
+> **Project:** Customer Segmentation using RFM Analysis and Unsupervised Learning  
+> **Dataset:** Online Retail  
+> **Techniques:** RFM Analysis, K-Means, Agglomerative Clustering, DBSCAN
+
+---
+
+## 🔄 Project Workflow
+
+<p align="center">
+  <img src="assets/workflow.png"
+       alt="Customer Segmentation Project Workflow"
+       width="950">
+</p>
+
+### Workflow
+
+```text
+Raw Transaction Data
+        ↓
+Data Cleaning
+        ↓
+UK Customer Filtering
+        ↓
+RFM Feature Engineering
+        ↓
+Outlier Treatment
+        ↓
+Log Transformation
+        ↓
+Feature Scaling
+        ↓
+K-Means / Agglomerative / DBSCAN
+        ↓
+Cluster Evaluation
+        ↓
+Customer Segmentation
+        ↓
+Business Insights
 
 # 📊 Clustering Model Comparison
 
